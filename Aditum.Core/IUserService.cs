@@ -9,6 +9,8 @@ namespace Aditum.Core
         event EventHandler Changed;
         event EventHandler<Exception> ExceptionOccured;
         void DumpTo(Stream stream);
+        void DumpTo(string fileLocation);
+        void LoadFrom(string fileLocation);
         void LoadFrom(Stream stream);
         void EnsureUserId(TUserId userId);
         void EnsureGroupId(TGroupId groupId);

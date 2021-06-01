@@ -84,6 +84,20 @@ namespace Aditum.Core
             writer.Dispose();
         }
 
+        public void DumpTo(string fileLocation)
+        {
+            using (var fs=File.OpenWrite(fileLocation))
+            {
+                DumpTo(fs);
+            }
+        }
+        public void LoadFrom(string fileLocation)
+        {
+            using (var fs=File.OpenRead(fileLocation))
+            {
+                LoadFrom(fs);
+            }
+        }
         public void LoadFrom(Stream stream)
         {
             if (_strategy == null)
@@ -200,6 +214,7 @@ namespace Aditum.Core
             {
                 WriteLock();
                 _userIds.Add(userId);
+                OnChanged(this);
                 ExitWriteLockIfExists();
             }
 
@@ -212,6 +227,7 @@ namespace Aditum.Core
             {
                 WriteLock();
                 _groupIds.Add(groupId);
+                OnChanged(this);
                 ExitWriteLockIfExists();
             }
             ExitReadLockIfExists(true);
@@ -223,6 +239,7 @@ namespace Aditum.Core
             {
                 WriteLock();
                 _operationIds.Add(operationId);
+                OnChanged(this);
                 ExitWriteLockIfExists();
             }
             ExitReadLockIfExists(true);
@@ -247,6 +264,7 @@ namespace Aditum.Core
 
                 WriteLock();
                 _userGroups.Add((userId, groupId));
+                OnChanged(this);
             }
             catch (Exception e)
             {
@@ -280,6 +298,7 @@ namespace Aditum.Core
                     }
                 }
                 _userExtraPermissions.Add((userId, operationId, permission));
+                OnChanged(this);
             }
             catch (Exception e)
             {
@@ -311,6 +330,7 @@ namespace Aditum.Core
                     _groupPermissions.Remove(oldPermission);
                 }
                 _groupPermissions.Add((groupId, operationId, permission));
+                OnChanged(this);
             }
             catch (Exception e)
             {
@@ -339,6 +359,7 @@ namespace Aditum.Core
                 }
                 WriteLock();
                 _userGroups.Remove((userId, groupId));
+                OnChanged(this);
             }
             catch (Exception e)
             {
@@ -367,6 +388,7 @@ namespace Aditum.Core
                     WriteLock();
                     var oldPermission = _userExtraPermissions.First(expr);
                     _userExtraPermissions.Remove(oldPermission);
+                    OnChanged(this);
                 }
             }
             catch (Exception e)
@@ -396,6 +418,7 @@ namespace Aditum.Core
                     var oldPermission = _groupPermissions.First(expr);
                     WriteLock();
                     _groupPermissions.Remove(oldPermission);
+                    OnChanged(this);
                 }
             }
             catch (Exception e)
@@ -412,7 +435,6 @@ namespace Aditum.Core
 
         public virtual void OnChanged(UserService<TUserId, TGroupId, TOperationId, TPermission> e)
         {
-            WriteLock();
             try
             {
                 Changed?.Invoke(this, null);
@@ -420,10 +442,6 @@ namespace Aditum.Core
             catch (Exception exception)
             {
                 OnExceptionOccured(exception);
-            }
-            finally
-            {
-                ExitWriteLockIfExists();
             }
         }
 
