@@ -17,32 +17,28 @@ namespace DemoAspNetCoreApp.Controllers
         protected int CurrentUserId => 1;
 
 
-        [Route("/api/granted")]
+        [Route("/api/see")]
         [HttpGet]
         public string Granted()
         {
-            //demo operation
-            const int operationId = 1;
-            if (_userService.GetUserPermission(CurrentUserId, operationId))
+            if (_userService.GetUserPermission(CurrentUserId, Operations.CanSee))
             {
-                return "OK,Go on";
+                return "OK,You can see, try /api/update now ";
             }
 
-            return "Oops,You don't have permission";
+            return "Oops,You don't have permission to see ";
         }
 
-        [Route("/api/denied")]
+        [Route("/api/update")]
         [HttpGet]
         public string Denied()
         {
-            //demo operation
-            const int operationId = 2;
-            if (_userService.GetUserPermission(CurrentUserId, operationId))
+            if (_userService.GetUserPermission(CurrentUserId, Operations.CanUpdate))
             {
-                return "OK,Go on";
+                return "OK,you can update";
             }
 
-            return "Oops,You don't have permission";
+            return "Oops,You don't have permission to update";
         }
     }
 }

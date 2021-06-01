@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Aditum</RootNamespace>
+    <AssemblyName>Aditum</AssemblyName>
   </PropertyGroup>
 
 </Project>

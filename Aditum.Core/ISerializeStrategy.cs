@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-namespace Aditum.Core
+namespace Aditum
 {
     public interface ISerializeStrategy<TUserId, TGroupId, TOperationId, TPermission>
     {

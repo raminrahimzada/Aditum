@@ -1,5 +1,4 @@
 using System.IO;
-using Aditum.Core;
 
 namespace Aditum.Tests
 {

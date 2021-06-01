@@ -1,8 +1,13 @@
 using System.IO;
-using Aditum.Core;
+using Aditum;
 
 namespace DemoAspNetCoreApp
 {
+    public static class Operations
+    {
+        public const int CanSee = 1;
+        public const int CanUpdate = 2;
+    }
     public class AppUserService:UserService<int,int,int,bool>
     {
         public AppUserService():base(new AppSerializationStrategy())
@@ -34,6 +39,7 @@ namespace DemoAspNetCoreApp
             EnsureUserIsInGroup(1, 1);
             SetGroupPermission(1, 1, true);
             SetGroupPermission(1, 2, false);
+            
         }
     }
 

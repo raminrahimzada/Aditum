@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Aditum.Core
+namespace Aditum
 {
     public class UserService<TUserId,TGroupId,TOperationId, TPermission> : IUserService<TUserId, TGroupId, TOperationId, TPermission> 
         where TUserId:IComparable<TUserId>
