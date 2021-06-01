@@ -57,5 +57,5 @@ var tomCanChange = GetUserPermission(tom,canChangeSecretsOfUniverse);
 //these will return true and false
 var bobCanSee = GetUserPermission(bob,canSeeSecretsOfUniverse);
 var bobCanChange = GetUserPermission(bob,canChangeSecretsOfUniverse);
-//Because we exclusively deny bob for canChangeSecretsOfUniverse operation<br/>
+//Because we exclusively deny bob for canChangeSecretsOfUniverse operation
 //although he is in admins and in admins by default all users can 'canChangeSecretsOfUniverse'
