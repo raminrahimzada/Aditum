@@ -5,7 +5,7 @@ With Aditum You can set permission to user or group according to Operations<br/>
 User , Group and Operation details are not stored in Aditum <br/>
 You can only set it's identity - Id ,<br/>
 If you want to store additional detail -  just store them elsewhere with referencing it's id  <br/>
-Because Aditum is intended only for authorization purposes 
+Because Aditum is intended only for authorization purposes <br/>
 Here Id can be int,long,Guid and whatever you want 
 
 # Configuration  (for asp.net core configuration see [this](https://github.com/raminrahimzada/Aditum/tree/master/DemoAspNetCoreApp))
@@ -84,5 +84,5 @@ service.LoadFrom(stream);
 Dump/Load is  using memory mapped structure and this causes less space (usually in KBs)  <br/>
 To Optimize dump/load speed and storage size customize serialization strategy,<br/>
 If you are using int,long,guid or byte as id type then there is built in serialization strategies implemented <br/>
-for detailed configuration  code see [this](https://github.com/raminrahimzada/Aditum/blob/master/DemoAspNetCoreApp/AppUserService.cs)
+For detailed configuration  code see [this](https://github.com/raminrahimzada/Aditum/blob/master/DemoAspNetCoreApp/AppUserService.cs)
 
