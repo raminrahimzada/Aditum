@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Aditum.Core
 {
-    public class UserService<TUserId,TGroupId,TOperationId, TPermission>
+    public class UserService<TUserId,TGroupId,TOperationId, TPermission> : IUserService<TUserId, TGroupId, TOperationId, TPermission> 
         where TUserId:IComparable<TUserId>
         where TGroupId:IComparable<TGroupId>
         where TPermission:struct
@@ -14,26 +15,135 @@ namespace Aditum.Core
         private readonly List<TUserId> _userIds = new List<TUserId>();
         private readonly List<TGroupId> _groupIds = new List<TGroupId>();
         private readonly List<TOperationId> _operationIds = new List<TOperationId>();
-        public event EventHandler Changed;
-        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim();
+        
         private readonly List<(TUserId UserId, TGroupId GroupId)> _userGroups = new List<(TUserId, TGroupId)>();
-
         private readonly List<(TGroupId GroupId, TOperationId OperationId, TPermission Permission)> _groupPermissions =
             new List<(TGroupId GroupId, TOperationId OperationId,TPermission permission)>();
-
         private readonly List<(TUserId UserId, TOperationId OperationId, TPermission Permission)> _userExtraPermissions
             = new List<(TUserId UserId, TOperationId OperationId, TPermission Permission)>();
 
+        public event EventHandler Changed;
+        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim();
         public event EventHandler<Exception> ExceptionOccured;
-       
-        public byte[] Dump()
+
+        private readonly ISerializeStrategy<TUserId, TGroupId, TOperationId, TPermission> _strategy;
+
+        public UserService(ISerializeStrategy<TUserId, TGroupId, TOperationId, TPermission> strategy=null)
         {
-            throw new NotImplementedException();
+            _strategy = strategy;
         }
 
-        public void Load(ref byte[] buffer)
+        public void DumpTo(Stream stream)
         {
-            throw new NotImplementedException();
+            if (_strategy == null)
+                throw new Exception("Serialization Strategy needed for dump, Please set it from ctor");
+
+            var writer = new BinaryWriter(stream);
+            //1. _userIds
+            writer.Write(_userIds.Count);
+            foreach (var userId in _userIds)
+            {
+                _strategy.Serialize(writer, userId);
+            }
+            //2. _groupIds
+            writer.Write(_groupIds.Count);
+            foreach (var groupId in _groupIds)
+            {
+                _strategy.Serialize(writer, groupId);
+            }
+            //3. _operationIds
+            writer.Write(_operationIds.Count);
+            foreach (var operationId in _operationIds)
+            {
+                _strategy.Serialize(writer, operationId);
+            }
+            //4. _userGroups
+            writer.Write(_userGroups.Count);
+            foreach (var (userId, groupId) in _userGroups)
+            {
+                _strategy.Serialize(writer, userId);
+                _strategy.Serialize(writer, groupId);
+            }
+            //5. _groupPermissions
+            writer.Write(_groupPermissions.Count);
+            foreach (var (groupId, operationId, permission) in _groupPermissions)
+            {
+                _strategy.Serialize(writer, groupId);
+                _strategy.Serialize(writer, operationId);
+                _strategy.Serialize(writer, permission);
+            }
+            //6. _userExtraPermissions
+            writer.Write(_userExtraPermissions.Count);
+            foreach (var (userId, operationId, permission) in _userExtraPermissions)
+            {
+                _strategy.Serialize(writer, userId);
+                _strategy.Serialize(writer, operationId);
+                _strategy.Serialize(writer, permission);
+            }
+            writer.Flush();
+            writer.Dispose();
+        }
+
+        public void LoadFrom(Stream stream)
+        {
+            if (_strategy == null)
+                throw new Exception("Serialization Strategy needed for Load, Please set it from ctor");
+
+            using (var reader = new BinaryReader(stream))
+            {
+                //1. _userIds
+                var userIdLength = reader.ReadInt32();
+                for (var i = 0; i < userIdLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TUserId userId);
+                    _userIds.Add(userId);
+                }
+
+                //2. _groupIds
+                var groupIdLength = reader.ReadInt32();
+                for (var i = 0; i < groupIdLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TGroupId groupId);
+                    _groupIds.Add(groupId);
+                }
+
+                //3. _operationIds
+                var operationIdLength = reader.ReadInt32();
+                for (var i = 0; i < operationIdLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TOperationId operationId);
+                    _operationIds.Add(operationId);
+                }
+
+                //4. _userGroups
+                var userGroupsLength = reader.ReadInt32();
+                for (var i = 0; i < userGroupsLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TUserId userId);
+                    _strategy.Deserialize(reader, out TGroupId groupId);
+                    _userGroups.Add((userId, groupId));
+                }
+
+                //5. _groupPermissions
+                var groupPermissionsLength = reader.ReadInt32();
+                for (var i = 0; i < groupPermissionsLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TGroupId groupId);
+                    _strategy.Deserialize(reader, out TOperationId operationId);
+                    _strategy.Deserialize(reader, out TPermission permission);
+                    _groupPermissions.Add((groupId, operationId, permission));
+                }
+
+                //6. _userExtraPermissions
+                var userExtraPermissionsLength = reader.ReadInt32();
+                for (var i = 0; i < userExtraPermissionsLength; i++)
+                {
+                    _strategy.Deserialize(reader, out TUserId userId);
+                    _strategy.Deserialize(reader, out TOperationId operationId);
+                    _strategy.Deserialize(reader, out TPermission permission);
+                    _userExtraPermissions.Add((userId, operationId, permission));
+                }
+            }
         }
 
         #region Helper
@@ -91,7 +201,8 @@ namespace Aditum.Core
                 WriteLock();
                 _userIds.Add(userId);
                 ExitWriteLockIfExists();
-            };
+            }
+
             ExitReadLockIfExists(true);
         }
         public void EnsureGroupId(TGroupId groupId)
@@ -102,10 +213,9 @@ namespace Aditum.Core
                 WriteLock();
                 _groupIds.Add(groupId);
                 ExitWriteLockIfExists();
-            };
+            }
             ExitReadLockIfExists(true);
         }
-
         public void EnsureOperationId(TOperationId operationId)
         {
             ReadLock(true);
@@ -114,7 +224,7 @@ namespace Aditum.Core
                 WriteLock();
                 _operationIds.Add(operationId);
                 ExitWriteLockIfExists();
-            };
+            }
             ExitReadLockIfExists(true);
         }
 
@@ -148,8 +258,7 @@ namespace Aditum.Core
                 ExitReadLockIfExists(true);
             }
         }
-
-        public void SetUserExtraPermission(TUserId userId, TOperationId operationId, TPermission permission)
+        public void SetUserExclusivePermission(TUserId userId, TOperationId operationId, TPermission permission)
         {
             try
             {
@@ -241,7 +350,6 @@ namespace Aditum.Core
                 ExitReadLockIfExists(true);
             }
         }
-
         public void UnSetUserExtraPermission(TUserId userId,TOperationId operationId)
         {
             try
@@ -271,8 +379,6 @@ namespace Aditum.Core
                 ExitReadLockIfExists(true);
             }
         }
-
-      
         public void UnSetGroupPermission(TGroupId groupId, TOperationId operationId)
         {
             try
@@ -304,7 +410,7 @@ namespace Aditum.Core
         }
         #endregion
 
-        protected virtual void OnChanged(UserService<TUserId, TGroupId, TOperationId, TPermission> e)
+        public virtual void OnChanged(UserService<TUserId, TGroupId, TOperationId, TPermission> e)
         {
             WriteLock();
             try
@@ -321,7 +427,7 @@ namespace Aditum.Core
             }
         }
 
-        protected virtual void OnExceptionOccured(Exception e)
+        public virtual void OnExceptionOccured(Exception e)
         {
             ExceptionOccured?.Invoke(this, e);
         }
@@ -361,7 +467,17 @@ namespace Aditum.Core
             {
                 ExitReadLockIfExists(false);
             }
+        }
 
+        public TPermission GetGroupPermission(TGroupId groupId, TOperationId operationId)
+        {
+            Func<(TGroupId GroupId, TOperationId OperationId, TPermission Permission), bool> expr = x =>
+                x.GroupId.Equals(groupId) && x.OperationId.Equals(operationId);
+
+            ReadLock(false);
+            var permission = _groupPermissions.Any(expr) ? _groupPermissions.First(expr).Permission : default;
+            ExitReadLockIfExists(false);
+            return permission;
         }
 
         public bool UserExists(TUserId userId)
@@ -371,6 +487,7 @@ namespace Aditum.Core
             ExitReadLockIfExists(false);
             return result;
         }
+
         public bool GroupExists(TGroupId groupId)
         {
             ReadLock(false);
@@ -378,6 +495,7 @@ namespace Aditum.Core
             ExitReadLockIfExists(false);
             return result;
         }
+
         public bool OperationExists(TOperationId operationId)
         {
             ReadLock(false);
@@ -392,7 +510,27 @@ namespace Aditum.Core
             ExitReadLockIfExists(false);
             return result;
         }
-        
+        public IReadOnlyList<TUserId> EnumerateUserIds()
+        {
+            ReadLock(false);
+            var result = _userIds.AsReadOnly();
+            ExitReadLockIfExists(false);
+            return result;
+        }
+        public IReadOnlyList<TGroupId> EnumerateGroupIds()
+        {
+            ReadLock(false);
+            var result = _groupIds.AsReadOnly();
+            ExitReadLockIfExists(false);
+            return result;
+        }
+        public IReadOnlyList<TOperationId> EnumerateOperationIds()
+        {
+            ReadLock(false);
+            var result = _operationIds.AsReadOnly();
+            ExitReadLockIfExists(false);
+            return result;
+        }
         #endregion
 
     }
