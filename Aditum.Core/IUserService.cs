@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Aditum
+namespace Aditum.Core
 {
     public interface IUserService<TUserId, TGroupId, TOperationId, TPermission> where TUserId : IComparable<TUserId> where TGroupId : IComparable<TGroupId> where TPermission : struct
     {

@@ -1,5 +1,6 @@
 using System.IO;
 using Aditum;
+using Aditum.Core;
 
 namespace DemoAspNetCoreApp
 {

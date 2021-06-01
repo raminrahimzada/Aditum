@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Aditum
+namespace Aditum.Core
 {
     public abstract class ByteSerializationStrategy<TPermission> :
         ISerializeStrategy<byte, byte, byte, TPermission>

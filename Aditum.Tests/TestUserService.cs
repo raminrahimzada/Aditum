@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Aditum.Core;
 
 namespace Aditum.Tests
 {
