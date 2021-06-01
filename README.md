@@ -5,7 +5,7 @@ Granular User Access Management - Users, Groups, Operations, Permissions (fully 
 
 | | |
 | --- | --- |
-| **Quality** | [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=raminrahimzada_SQLEngine&metric=alert_status)](https://sonarcloud.io/dashboard?id=Aditum.Core) [![GitHub issues](https://img.shields.io/github/stars/raminrahimzada/Aditum)](https://github.com/raminrahimzada/Aditum/issues) | 
+| **Quality** | [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=raminrahimzada_Aditum&metric=alert_status)](https://sonarcloud.io/dashboard?id=raminrahimzada_Aditum) [![GitHub issues](https://img.shields.io/github/stars/raminrahimzada/Aditum)](https://github.com/raminrahimzada/Aditum/issues) | 
 | **Nuget** | [![Nuget](https://buildstats.info/nuget/Aditum.Core)](http://nuget.org/packages/Aditum.Core) |
 
 
