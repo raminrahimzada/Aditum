@@ -1,10 +1,20 @@
 # Aditum
 Granular User Access Management - Users, Groups, Operations, Permissions (fully thread-safe)
 
+
+
+| | |
+| --- | --- |
+| **Build** | [![Build status](https://ci.appveyor.com/api/projects/status/xxxxxx?svg=true&branch=master)](https://ci.appveyor.com/project/raminrahimzada/Aditum.Core) |
+| **Quality** | [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=raminrahimzada_SQLEngine&metric=alert_status)](https://sonarcloud.io/dashboard?id=Aditum.Core) [![GitHub issues](https://img.shields.io/github/issues-raw/raminrahimzada/Aditum.Core.svg)](https://github.com/raminrahimzada/Aditum/issues) | 
+| **Nuget** | [![Nuget](https://buildstats.info/nuget/SQLEngine)](http://nuget.org/packages/Aditum.Core) |
+
+
 With Aditum You can set permission to user or group according to Operations<br/>
 User , Group and Operation details are not stored in Aditum <br/>
 You can only set it's identity - Id ,<br/>
 If you want to store additional detail -  just store them elsewhere with referencing it's id  <br/>
+Because Aditum is intended only for authorization purposes <br/>
 Here Id can be int,long,Guid and whatever you want 
 
 # Configuration  (for asp.net core configuration see [this](https://github.com/raminrahimzada/Aditum/tree/master/DemoAspNetCoreApp))
@@ -83,5 +93,5 @@ service.LoadFrom(stream);
 Dump/Load is  using memory mapped structure and this causes less space (usually in KBs)  <br/>
 To Optimize dump/load speed and storage size customize serialization strategy,<br/>
 If you are using int,long,guid or byte as id type then there is built in serialization strategies implemented <br/>
-for detailed configuration  code see [this](https://github.com/raminrahimzada/Aditum/blob/master/DemoAspNetCoreApp/AppUserService.cs)
+For detailed configuration  code see [this](https://github.com/raminrahimzada/Aditum/blob/master/DemoAspNetCoreApp/AppUserService.cs)
 
