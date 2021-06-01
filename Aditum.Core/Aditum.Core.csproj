@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Aditum</RootNamespace>
     <AssemblyName>Aditum</AssemblyName>
+    <Authors>Ramin Rahimzada</Authors>
+    <Company>RRR</Company>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/raminrahimzada/Aditum</RepositoryUrl>    
+    <Description>Granular User Access Management - Users, Groups, Operations, Permissions (fully thread-safe)</Description>
+    <Copyright></Copyright>
+	<Version>1.0.1</Version>
+	<RepositoryType>git</RepositoryType>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
 </Project>
