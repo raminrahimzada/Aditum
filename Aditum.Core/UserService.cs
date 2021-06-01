@@ -433,7 +433,7 @@ namespace Aditum.Core
         }
         #endregion
 
-        public virtual void OnChanged(UserService<TUserId, TGroupId, TOperationId, TPermission> e)
+        private void OnChanged(UserService<TUserId, TGroupId, TOperationId, TPermission> e)
         {
             try
             {
@@ -445,7 +445,7 @@ namespace Aditum.Core
             }
         }
 
-        public virtual void OnAditumExceptionOccured(AditumException e)
+        private void OnAditumExceptionOccured(AditumException e)
         {
             ExceptionOccured?.Invoke(this, e);
         }

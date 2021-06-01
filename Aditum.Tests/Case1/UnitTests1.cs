@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aditum.Core;
 using Xunit;
 
 namespace Aditum.Tests.Case1
@@ -142,7 +143,68 @@ namespace Aditum.Tests.Case1
             Assert.False(_service.GetGroupPermission(1, 1));
             Assert.True(_service.GetUserPermission(1, 1));
         }
-        
+
+        [Fact]
+        public void Test_UnKnown_User_And_Group()
+        {
+            Random rand = new Random();
+            int Id()
+            {
+                return rand.Next();
+            }
+            Assert.False(_service.UserExists(Id()));
+            Assert.False(_service.OperationExists(Id()));
+            try
+            {
+                _service.GetUserPermission(Id(), Id());
+                //this should not be hit
+                Assert.True(false);
+            }            
+            catch (Exception e)
+            {
+                Assert.True(e is AditumException);
+            }
+            try
+            {
+                _service.EnsureUserIsInGroup(Id(), Id());
+                //this should not be hit
+                Assert.True(false);
+            }            
+            catch (Exception e)
+            {
+                Assert.True(e is AditumException);
+            }
+            try
+            {
+                _service.UnSetUserExtraPermission(Id(), Id());
+                //this should not be hit
+                Assert.True(false);
+            }            
+            catch (Exception e)
+            {
+                Assert.True(e is AditumException);
+            }
+            try
+            {
+                _service.UnSetGroupPermission(Id(), Id());
+                //this should not be hit
+                Assert.True(false);
+            }            
+            catch (Exception e)
+            {
+                Assert.True(e is AditumException);
+            }
+            try
+            {
+                _service.SetUserExclusivePermission(Id(), Id(), true);
+                //this should not be hit
+                Assert.True(false);
+            }            
+            catch (Exception e)
+            {
+                Assert.True(e is AditumException);
+            }
+        }
         
         [Fact]
         public void Test_Service_Dump_And_Load()
