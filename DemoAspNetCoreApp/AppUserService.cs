@@ -1,5 +1,4 @@
 using System.IO;
-using Aditum;
 using Aditum.Core;
 
 namespace DemoAspNetCoreApp
@@ -17,6 +16,7 @@ namespace DemoAspNetCoreApp
 
         public void Configure(string fileLocation)
         {
+            //on change save it to where you want : file,redis,sql,mongo etc...
             Changed += (sender, e) => (sender as AppUserService)?.DumpTo(fileLocation);
 
             //Initialize on startup

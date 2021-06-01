@@ -10,22 +10,25 @@ namespace Aditum.Core
     public class UserService<TUserId,TGroupId,TOperationId, TPermission> : IUserService<TUserId, TGroupId, TOperationId, TPermission> 
         where TUserId:IComparable<TUserId>
         where TGroupId:IComparable<TGroupId>
-        where TPermission:struct
     {
+        /// Main lists
         private readonly List<TUserId> _userIds = new List<TUserId>();
         private readonly List<TGroupId> _groupIds = new List<TGroupId>();
         private readonly List<TOperationId> _operationIds = new List<TOperationId>();
         
+        // Join lists
         private readonly List<(TUserId UserId, TGroupId GroupId)> _userGroups = new List<(TUserId, TGroupId)>();
         private readonly List<(TGroupId GroupId, TOperationId OperationId, TPermission Permission)> _groupPermissions =
             new List<(TGroupId GroupId, TOperationId OperationId,TPermission permission)>();
         private readonly List<(TUserId UserId, TOperationId OperationId, TPermission Permission)> _userExtraPermissions
             = new List<(TUserId UserId, TOperationId OperationId, TPermission Permission)>();
-
+        
+        // Events
         public event EventHandler Changed;
-        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim();
-        public event EventHandler<Exception> ExceptionOccured;
+        public event EventHandler<AditumException> ExceptionOccured;
 
+        // Readonly helper fields
+        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim();
         private readonly ISerializeStrategy<TUserId, TGroupId, TOperationId, TPermission> _strategy;
 
         public UserService(ISerializeStrategy<TUserId, TGroupId, TOperationId, TPermission> strategy=null)
@@ -36,7 +39,7 @@ namespace Aditum.Core
         public void DumpTo(Stream stream)
         {
             if (_strategy == null)
-                throw new Exception("Serialization Strategy needed for dump, Please set it from ctor");
+                throw AditumException.ParameterNeeded(nameof(_strategy));
 
             var writer = new BinaryWriter(stream);
             //1. _userIds
@@ -101,7 +104,7 @@ namespace Aditum.Core
         public void LoadFrom(Stream stream)
         {
             if (_strategy == null)
-                throw new Exception("Serialization Strategy needed for Load, Please set it from ctor");
+                throw AditumException.ParameterNeeded(nameof(_strategy));
 
             using (var reader = new BinaryReader(stream))
             {
@@ -255,8 +258,8 @@ namespace Aditum.Core
             ReadLock(true);
             try
             {
-                if (!_userIds.Contains(userId)) throw new Exception("User does not already exist:" + userId);
-                if (!_groupIds.Contains(groupId)) throw new Exception("Group does not exist:" + groupId);
+                if (!_userIds.Contains(userId)) throw AditumException.NoMatchFound("User", userId);
+                if (!_groupIds.Contains(groupId)) throw AditumException.NoMatchFound("Group", groupId);
                 if (_userGroups.Any(x => x.UserId.Equals(userId) && x.GroupId.Equals(groupId)))
                 {
                     return;
@@ -266,9 +269,9 @@ namespace Aditum.Core
                 _userGroups.Add((userId, groupId));
                 OnChanged(this);
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -281,17 +284,17 @@ namespace Aditum.Core
             try
             {
                 ReadLock(true);
-                if (!_userIds.Contains(userId)) throw new Exception("User does not exist:" + userId);
+                if (!_userIds.Contains(userId)) throw AditumException.NoMatchFound("User", userId);
 
-                Func<(TUserId UserId, TOperationId OperationId, TPermission permission), bool> expr = x =>
+                bool Predicate((TUserId UserId, TOperationId OperationId, TPermission permission) x) =>
                     x.OperationId.Equals(operationId) && x.UserId.Equals(userId);
 
                 var hasExtraPermission =
-                    _userExtraPermissions.Any(expr);
+                    _userExtraPermissions.Any(Predicate);
                 WriteLock();
                 if (hasExtraPermission)
                 {
-                    var oldPermission = _userExtraPermissions.First(expr);
+                    var oldPermission = _userExtraPermissions.First(Predicate);
                     if (!oldPermission.Equals(permission))
                     {
                         _userExtraPermissions.Remove(oldPermission);
@@ -300,9 +303,9 @@ namespace Aditum.Core
                 _userExtraPermissions.Add((userId, operationId, permission));
                 OnChanged(this);
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -316,25 +319,24 @@ namespace Aditum.Core
             {
                 ReadLock(true);
 
-                if (!_groupIds.Contains(groupId)) throw new Exception("Group does not exist:" + groupId);
+                if (!_groupIds.Contains(groupId)) throw AditumException.NoMatchFound("Group", groupId);
 
-                Func<(TGroupId GroupId, TOperationId OperationId, TPermission permission), bool> expr = x =>
-                    x.OperationId.Equals(operationId) && x.GroupId.Equals(groupId);
+                bool Predicate((TGroupId GroupId, TOperationId OperationId, TPermission permission) x) => x.OperationId.Equals(operationId) && x.GroupId.Equals(groupId);
 
                 var hasGroupPermission =
-                    _groupPermissions.Any(expr);
+                    _groupPermissions.Any(Predicate);
                 WriteLock();
                 if (hasGroupPermission)
                 {
-                    var oldPermission = _groupPermissions.First(expr);
+                    var oldPermission = _groupPermissions.First(Predicate);
                     _groupPermissions.Remove(oldPermission);
                 }
                 _groupPermissions.Add((groupId, operationId, permission));
                 OnChanged(this);
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -351,8 +353,8 @@ namespace Aditum.Core
             ReadLock(true);
             try
             {
-                if (!_userIds.Contains(userId)) throw new Exception("User does not already exist:" + userId);
-                if (!_groupIds.Contains(groupId)) throw new Exception("Group does not exist:" + groupId);
+                if (!_userIds.Contains(userId)) throw AditumException.NoMatchFound("User", userId);
+                if (!_groupIds.Contains(groupId)) throw AditumException.NoMatchFound("Group", groupId);
                 if (!_userGroups.Any(x => x.UserId.Equals(userId) && x.GroupId.Equals(groupId)))
                 {
                     return;
@@ -361,9 +363,9 @@ namespace Aditum.Core
                 _userGroups.Remove((userId, groupId));
                 OnChanged(this);
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -376,24 +378,23 @@ namespace Aditum.Core
             try
             {
                 ReadLock(true);
-                if (!_userIds.Contains(userId)) throw new Exception("User does not exist:" + userId);
+                if (!_userIds.Contains(userId)) throw AditumException.NoMatchFound("User", userId);
 
-                Func<(TUserId UserId, TOperationId OperationId, TPermission permission), bool> expr = x =>
-                    x.OperationId.Equals(operationId) && x.UserId.Equals(userId);
+                bool Predicate((TUserId UserId, TOperationId OperationId, TPermission permission) x) => x.OperationId.Equals(operationId) && x.UserId.Equals(userId);
 
                 var hasGroupPermission =
-                    _userExtraPermissions.Any(expr);
+                    _userExtraPermissions.Any(Predicate);
                 if (hasGroupPermission)
                 {
                     WriteLock();
-                    var oldPermission = _userExtraPermissions.First(expr);
+                    var oldPermission = _userExtraPermissions.First(Predicate);
                     _userExtraPermissions.Remove(oldPermission);
                     OnChanged(this);
                 }
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -407,23 +408,22 @@ namespace Aditum.Core
             {
                 ReadLock(true);
 
-                if (!_groupIds.Contains(groupId)) throw new Exception("Group does not exist:" + groupId);
+                if (!_groupIds.Contains(groupId)) throw AditumException.NoMatchFound("Group", groupId);
 
-                Func<(TGroupId GroupId, TOperationId OperationId, TPermission permission), bool> expr = x =>
-                    x.OperationId.Equals(operationId) && x.GroupId.Equals(groupId);
+                bool Predicate((TGroupId GroupId, TOperationId OperationId, TPermission permission) x) => x.OperationId.Equals(operationId) && x.GroupId.Equals(groupId);
 
-                var hasGroupPermission = _groupPermissions.Any(expr);
+                var hasGroupPermission = _groupPermissions.Any(Predicate);
                 if (hasGroupPermission)
                 {
-                    var oldPermission = _groupPermissions.First(expr);
+                    var oldPermission = _groupPermissions.First(Predicate);
                     WriteLock();
                     _groupPermissions.Remove(oldPermission);
                     OnChanged(this);
                 }
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
             }
             finally
             {
@@ -437,15 +437,15 @@ namespace Aditum.Core
         {
             try
             {
-                Changed?.Invoke(this, null);
+                Changed?.Invoke(this, EventArgs.Empty);
             }
-            catch (Exception exception)
+            catch (AditumException exception)
             {
-                OnExceptionOccured(exception);
+                OnAditumExceptionOccured(exception);
             }
         }
 
-        public virtual void OnExceptionOccured(Exception e)
+        public virtual void OnAditumExceptionOccured(AditumException e)
         {
             ExceptionOccured?.Invoke(this, e);
         }
@@ -457,28 +457,28 @@ namespace Aditum.Core
             try
             {
                 ReadLock(false);
-                if (!_userIds.Contains(userId)) throw new Exception("User does not exist:" + userId);
+                if (!_userIds.Contains(userId)) throw AditumException.NoMatchFound("User", userId);
                 var userGroups = _userGroups.Where(x => x.UserId.Equals(userId)).Select(x => x.GroupId).ToArray();
                 var groupPermissions = _groupPermissions
                     .Where(x => userGroups.Contains(x.GroupId) && x.OperationId.Equals(operationId))
                     .Select(x => x.Permission)
                     .Distinct()
                     .ToArray();
-                
-                Func<(TUserId UserId, TOperationId OperationId, TPermission Permission), bool> expr = x =>
-                    x.UserId.Equals(userId) && x.OperationId.Equals(operationId);
-                var hasExclusiveUserPermission = _userExtraPermissions.Any(expr);
+
+                bool Predicate((TUserId UserId, TOperationId OperationId, TPermission Permission) x) => x.UserId.Equals(userId) && x.OperationId.Equals(operationId);
+                var hasExclusiveUserPermission = _userExtraPermissions.Any(Predicate);
                 if (hasExclusiveUserPermission)
                 {
-                    return _userExtraPermissions.Where(expr)
+                    return _userExtraPermissions.Where(Predicate)
                         .Select(x => x.Permission)
                         .First();
                 }
+                //TODO do not use Max here 
                 return groupPermissions.Max();
             }
-            catch (Exception e)
+            catch (AditumException e)
             {
-                OnExceptionOccured(e);
+                OnAditumExceptionOccured(e);
                 return default;
             }
             finally

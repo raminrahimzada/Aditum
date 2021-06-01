@@ -1,16 +1,16 @@
 using System.IO;
 using Aditum.Core;
 
-namespace Aditum.Tests
+namespace Aditum.Tests.Case2
 {
-    public class TestSerializer : ISerializeStrategy<int, int, int, bool>
+    public class TestSerializer2 : ISerializeStrategy<int, int, int, bool?>
     {
         public void Serialize(BinaryWriter writer, int i)
         {
             writer.Write(i);
         }
 
-        public void Serialize(BinaryWriter writer, bool permission)
+        public void Serialize(BinaryWriter writer, bool? permission)
         {
             writer.Write(permission);
         }
@@ -20,9 +20,9 @@ namespace Aditum.Tests
             i = reader.ReadInt32();
         }
 
-        public void Deserialize(BinaryReader reader, out bool b)
+        public void Deserialize(BinaryReader reader, out bool? b)
         {
-            b= reader.ReadBoolean();
+            b = reader.ReadBooleanNullable();
         }
     }
 }
