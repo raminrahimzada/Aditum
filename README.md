@@ -7,7 +7,7 @@ Granular User Access Management - Users, Groups, Operations, Permissions (fully 
 | --- | --- |
 | **Build** | [![Build status](https://ci.appveyor.com/api/projects/status/xxxxxx?svg=true&branch=master)](https://ci.appveyor.com/project/raminrahimzada/Aditum.Core) |
 | **Quality** | [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=raminrahimzada_SQLEngine&metric=alert_status)](https://sonarcloud.io/dashboard?id=Aditum.Core) [![GitHub issues](https://img.shields.io/github/issues-raw/raminrahimzada/Aditum.Core.svg)](https://github.com/raminrahimzada/Aditum/issues) | 
-| **Nuget** | [![Nuget](https://buildstats.info/nuget/SQLEngine)](http://nuget.org/packages/Aditum.Core) |
+| **Nuget** | [![Nuget](https://buildstats.info/nuget/Aditum.Core)](http://nuget.org/packages/Aditum.Core) |
 
 
 With Aditum You can set permission to user or group according to Operations<br/>
