@@ -10,9 +10,9 @@ namespace Aditum.Tests
             writer.Write(i);
         }
 
-        public void Serialize(BinaryWriter writer, bool b)
+        public void Serialize(BinaryWriter writer, bool permission)
         {
-            writer.Write(b);
+            writer.Write(permission);
         }
 
         public void Deserialize(BinaryReader reader, out int i)

@@ -11,9 +11,8 @@ namespace DemoAspNetCoreApp
     }
     public class AppUserService:UserService<int,int,int,bool>
     {
-        public AppUserService():base(new AppSerializationStrategy())
+        public AppUserService():base(new DemoAppSerializationStrategy())
         {
-           
         }
 
         public void Configure(string fileLocation)
@@ -44,7 +43,7 @@ namespace DemoAspNetCoreApp
         }
     }
 
-    public class AppSerializationStrategy:IntegerSerializationStrategy<bool>
+    public class DemoAppSerializationStrategy:IntegerSerializationStrategy<bool>
     {
         public override void Deserialize(BinaryReader reader, out bool permission)
         {

@@ -7,7 +7,7 @@ namespace Aditum.Core
         void Serialize(BinaryWriter writer, TUserId userId);
         void Serialize(BinaryWriter writer, TGroupId userId);
         void Serialize(BinaryWriter writer, TOperationId userId);
-        void Serialize(BinaryWriter writer, TPermission userId);
+        void Serialize(BinaryWriter writer, TPermission permission);
         
         void Deserialize(BinaryReader reader, out TUserId userId);
         void Deserialize(BinaryReader reader, out TGroupId groupId);
