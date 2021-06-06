@@ -3,16 +3,16 @@ using Aditum.Core;
 
 namespace Aditum.Tests.Case1
 {
-    public class TestSerializer1 : ISerializeStrategy<int, int, int, bool>
+    public class TestSerializer1 : ISerializeStrategy<int,int, int, int, bool>
     {
         public void Serialize(BinaryWriter writer, int i)
         {
             writer.Write(i);
         }
 
-        public void Serialize(BinaryWriter writer, bool permission)
+        public void Serialize(BinaryWriter writer, bool b)
         {
-            writer.Write(permission);
+            writer.Write(b);
         }
 
         public void Deserialize(BinaryReader reader, out int i)

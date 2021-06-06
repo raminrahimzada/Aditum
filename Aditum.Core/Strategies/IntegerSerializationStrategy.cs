@@ -3,7 +3,7 @@
 namespace Aditum.Core
 {
     public abstract class IntegerSerializationStrategy<TPermission> :
-        ISerializeStrategy<int, int, int, TPermission>
+        ISerializeStrategy<int, int, int,int, TPermission>
     {
         public void Serialize(BinaryWriter writer, int i)
         {

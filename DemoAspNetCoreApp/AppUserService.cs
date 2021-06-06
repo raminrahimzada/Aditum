@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Aditum.Core;
 
 namespace DemoAspNetCoreApp
@@ -8,9 +9,10 @@ namespace DemoAspNetCoreApp
         public const int CanSee = 1;
         public const int CanUpdate = 2;
     }
-    public class AppUserService:UserService<int,int,int,bool>
+
+    public class AppUserService:UserService<int,int,int,int,bool>
     {
-        public AppUserService():base(new DemoAppSerializationStrategy())
+        public AppUserService():base(new DemoAppPermissionStrategy(),new DemoAppSerializationStrategy())
         {
         }
 
@@ -31,15 +33,34 @@ namespace DemoAspNetCoreApp
         {
             //TODO DEMO purpose only,
             //adding some demo users and groups and setting permissions 
-            EnsureUserId(1);
-            EnsureGroupId(1);
-            EnsureOperationId(1);
-            EnsureOperationId(2);
-            EnsureOperationId(3);
-            EnsureUserIsInGroup(1, 1);
+            EnsureUser(1);
+            EnsureGroup(1);
+            EnsureOperation(1);
+            EnsureOperation(2);
+            EnsureOperation(3);
+            EnsureUser(1, 1);
             SetGroupPermission(1, 1, true);
             SetGroupPermission(1, 2, false);
-            
+        }
+    }
+
+    public class DemoAppPermissionStrategy : IPermissionSelectStrategy<int, int, bool>
+    {
+        public bool Decide(bool exclusivePermission, (int, int, bool)[] groupPermissions)
+        {
+            //if exclusive set then return it
+            return exclusivePermission;
+        }
+
+        public bool Decide((int, int, bool)[] groupPermissions)
+        {
+            //else at least 1 of groups allow  it, allow 
+            if (groupPermissions.Any(x => x.Item3))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 

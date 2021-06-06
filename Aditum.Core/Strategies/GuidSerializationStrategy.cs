@@ -4,7 +4,7 @@ using System.IO;
 namespace Aditum.Core
 {
     public abstract class GuidSerializationStrategy<TPermission> :
-        ISerializeStrategy<Guid, Guid, Guid, TPermission>
+        ISerializeStrategy<Guid, Guid, Guid,Guid, TPermission>
     {
         public void Serialize(BinaryWriter writer, Guid i)
         {
