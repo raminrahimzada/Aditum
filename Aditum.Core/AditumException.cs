@@ -2,7 +2,8 @@
 
 namespace Aditum.Core
 {
-    public class AditumException : Exception
+    [Serializable]
+    public sealed class AditumException : Exception
     {
         private AditumException(string message):base(message)
         {
