@@ -7,226 +7,282 @@ namespace Aditum.Tests.Case1
 {
     public class UnitTests1
     {
-        private static readonly Random rand = new Random();
+        private static readonly Random Rand = new Random();
         static int Id()
         {
-            return rand.Next();
-        }
-
-        private readonly TestUserService1 _service;
-        public UnitTests1()
-        {
-            _service = new TestUserService1();
-        }
+            return Rand.Next();
+        } 
 
         [Fact]
         public void Test_User_Add_1()
         {
-            _service.EnsureUser(1);
-            Assert.True(_service.UserExists(1));
+            var service = new TestUserService1();
+            var userId = Id();
+            service.EnsureUser(userId);
+            Assert.True(service.UserExists(userId));
         }
-        
+
         [Fact]
         public void Test_Add_Group_Type_1()
         {
-            _service.EnsureGroupType(1);
-            Assert.True(_service.GroupTypeExists(1));
+            var service = new TestUserService1();
+            var groupTypeId = Id();
+            service.EnsureGroupType(groupTypeId);
+            Assert.True(service.GroupTypeExists(groupTypeId));
         }
 
         [Fact]
         public void Test_Add_Group_Type_2()
         {
-            var idArr = new[] {Id(), Id(), Id(), Id()};
-            _service.EnsureGroupType(idArr);
+            var service = new TestUserService1();
+            var idArr = new[] { Id(), Id(), Id(), Id() };
+            service.EnsureGroupType(idArr);
             foreach (var groupTypeId in idArr)
             {
-                Assert.True(_service.GroupTypeExists(groupTypeId));
+                Assert.True(service.GroupTypeExists(groupTypeId));
             }
         }
-        
+
         [Fact]
         public void Test_User_Add_2()
         {
-            var userIdArray = new int[] { Id(), Id(), Id(), Id() };
-            _service.EnsureUser(userIdArray);
+            var service = new TestUserService1();
+            var userIdArray = new[] { Id(), Id(), Id(), Id() };
+            service.EnsureUser(userIdArray);
             foreach (var userId in userIdArray)
             {
-                Assert.True(_service.UserExists(userId));
+                Assert.True(service.UserExists(userId));
             }
         }
 
         [Fact]
         public void Test_User_And_Group_Add()
         {
-            _service.EnsureUser(userId: 1, groupId: 2);
-            Assert.True(_service.UserExists(1));
-            Assert.True(_service.GroupExists(2));
-            Assert.True(_service.IsUserInGroup(1, 2));
-            Assert.False(_service.IsUserInGroup(1, 3));
-            Assert.False(_service.IsUserInGroup(11, 2));
+            var userId = Id();
+            var groupId = Id();
+            var service = new TestUserService1();
+            service.EnsureUser(userId,groupId);
+            Assert.True(service.UserExists(userId));
+            Assert.True(service.GroupExists(groupId));
+            Assert.True(service.IsUserInGroup(userId, groupId));
+
+            Assert.False(service.IsUserInGroup(userId-1, groupId-1));
+            Assert.False(service.IsUserInGroup(userId-1, groupId-1));
         }
-        
+
         [Fact]
         public void Test_User_And_Group_And_GroupType_Add()
         {
-            _service.EnsureUser(userId: 1, groupId: 2,groupTypeId:3);
-            Assert.True(_service.UserExists(1));
-            Assert.True(_service.GroupExists(2));
-            Assert.True(_service.GroupTypeExists(3));
-            Assert.True(_service.IsUserInGroup(1, 2));
-            Assert.True(_service.IsGroupOfType(2, 3));
+            var userId = Id();
+            var groupId = Id();
+            var groupTypeId = Id();
+            var service = new TestUserService1();
+            service.EnsureUser(userId, groupId, groupTypeId);
+            Assert.True(service.UserExists(userId));
+            Assert.True(service.GroupExists(groupId));
+            Assert.True(service.GroupTypeExists(groupTypeId));
+            Assert.True(service.IsUserInGroup(userId, groupId));
+            Assert.True(service.IsGroupOfType(groupId, groupTypeId));
         }
 
 
         [Fact]
         public void Test_Group_Add_1()
         {
-            _service.EnsureGroup(1);
-            Assert.True(_service.GroupExists(1));
+            var groupId = Id();
+            
+            var service = new TestUserService1();
+            service.EnsureGroup(groupId);
+            Assert.True(service.GroupExists(groupId));
         }
         [Fact]
         public void Test_Group_Add_2()
         {
-            var groupIdArray = new int[] {Id(), Id(), Id(),Id()};
-            _service.EnsureGroup(groupIdArray);
+            var service = new TestUserService1();
+            var groupIdArray = new int[] { Id(), Id(), Id(), Id() };
+            service.EnsureGroup(groupIdArray);
             foreach (var groupId in groupIdArray)
             {
-                Assert.True(_service.GroupExists(groupId));
+                Assert.True(service.GroupExists(groupId));
             }
         }
 
         [Fact]
         public void Test_Group_And_Group_Type_Add()
         {
-            _service.EnsureGroup(groupId: 1, groupTypeId: 2);
-            Assert.True(_service.GroupExists(1));
-            Assert.True(_service.GroupTypeExists(2));
+            var groupId = Id();
+            var groupTypeId = Id();
+            var service = new TestUserService1();
+            service.EnsureGroup(groupId, groupTypeId);
+            Assert.True(service.GroupExists(groupId));
+            Assert.True(service.GroupTypeExists(groupTypeId));
         }
 
 
         [Fact]
         public void Test_Operation_Add()
         {
+            var operationId = Id();
+            var service = new TestUserService1();
 
-            _service.EnsureOperation(1);
-            Assert.True(_service.OperationExists(1));
+            service.EnsureOperation(operationId);
+            Assert.True(service.OperationExists(operationId));
         }
 
 
         [Fact]
         public void Test_Add_User_To_Group()
         {
+            var service = new TestUserService1();
+            var userId1 = Id();
+            var userId2 = Id();
+            service.EnsureUser(userId1);
+            service.EnsureUser(userId2);
 
-            _service.EnsureUser(1);
-            _service.EnsureUser(2);
+            var groupId1 = Id();
+            var groupId2 = Id();
+            service.EnsureGroup(groupId1);
+            service.EnsureGroup(groupId2);
 
-            _service.EnsureGroup(1);
-            _service.EnsureGroup(2);
+            service.EnsureUser(userId1, groupId1);
 
-            _service.EnsureUser(1, 1);
-            Assert.True(_service.IsUserInGroup(1, 1));
-            Assert.False(_service.IsUserInGroup(1, 2));
-            Assert.False(_service.IsUserInGroup(2, 1));
-            Assert.False(_service.IsUserInGroup(2, 2));
+            //
+            Assert.True(service.IsUserInGroup(userId1, groupId1));
+            Assert.False(service.IsUserInGroup(userId1, groupId2));
+            Assert.False(service.IsUserInGroup(userId2, groupId1));
+            Assert.False(service.IsUserInGroup(userId2, groupId2));
         }
 
 
         [Fact]
         public void Test_Add_User_To_Group_And_Remove()
         {
+            var userId = Id();
+            var operationId = Id();
+            var groupId = Id();
+            var groupTypeId = Id();
 
-            _service.EnsureUser(1);
+            var service = new TestUserService1();
 
-            _service.EnsureGroup(1);
+            service.EnsureUser(userId);
 
-            _service.EnsureUser(1, 1);
-            Assert.True(_service.IsUserInGroup(1, 1));
+            service.EnsureGroup(groupId);
 
-            _service.RemoveUserFromGroup(1, 1);
-            Assert.False(_service.IsUserInGroup(1, 1));
+            service.EnsureUser(userId,groupId);
+            Assert.True(service.IsUserInGroup(userId, groupId));
 
-            _service.EnsureUser(1, 1);
-            Assert.True(_service.IsUserInGroup(1, 1));
+            service.RemoveUserFromGroup(userId,groupId);
+            Assert.False(service.IsUserInGroup(userId,groupId));
+
+            service.EnsureUser(userId, groupId);
+            Assert.True(service.IsUserInGroup(userId, groupId));
         }
 
 
         [Fact]
         public void Test_Group_Permission_Test_1()
         {
+            var userId = Id();
+            var operationId1 = Id();
+            var operationId2 = Id();
+            var groupId = Id();
+            var groupTypeId = Id();
 
-            _service.EnsureGroup(1);
-            _service.EnsureOperation(1);
-            _service.EnsureOperation(2);
+            var service = new TestUserService1();
+
+            service.EnsureGroup(groupId);
+            service.EnsureOperation(operationId1);
+            service.EnsureOperation(operationId2);
 
             //group 1 has permission on operation 1 but not on operation 2
-            _service.SetGroupPermission(1, 1, true);
+            service.SetGroupPermission(groupId, operationId1, true);
 
-            Assert.True(_service.GetGroupPermission(1, 1));
-            Assert.False(_service.GetGroupPermission(1, 2));
+            Assert.True(service.GetGroupPermission(groupId, operationId1));
+            Assert.False(service.GetGroupPermission(groupId, operationId2));
 
-            _service.UnSetGroupPermission(1, 1);
-            _service.SetGroupPermission(1, 2, true);
+            service.UnSetGroupPermission(groupId, operationId1);
+            service.SetGroupPermission(groupId, operationId2, true);
 
-            Assert.False(_service.GetGroupPermission(1, 1));
-            Assert.True(_service.GetGroupPermission(1, 2));
+            Assert.False(service.GetGroupPermission(groupId, operationId1));
+            Assert.True(service.GetGroupPermission(groupId,operationId2));
         }
 
-
+        
         [Fact]
         public void Test_User_Extra_Permission_1()
         {
+            var userId = Id();
+            var operationId1 = Id();
+            var operationId2 = Id();
+            var groupId = Id();
+            var groupTypeId = Id();
 
-            _service.EnsureGroup(1);
-            _service.EnsureOperation(1);
-            _service.EnsureUser(1);
+            var service = new TestUserService1();
+
+            service.EnsureGroup(groupId);
+            service.EnsureOperation(operationId1);
+            service.EnsureUser(userId);
 
             //group 1 has permission on operation 1 
-            _service.SetGroupPermission(1, 1, true);
+            service.SetGroupPermission(groupId, operationId1, true);
 
-            _service.EnsureUser(1, 1);
+            service.EnsureUser(userId, groupId);
 
 
             //user is in group 1 so have access to operation 1
             //but we deny her operation 1 exclusively
-            _service.SetUserExclusivePermission(1, 1, false);
+            service.SetUserExclusivePermission(userId, operationId1, false);
             //so
-            Assert.True(_service.GetGroupPermission(1, 1));
-            Assert.False(_service.GetUserPermission(1, 1));
+            Assert.True(service.GetGroupPermission(groupId, operationId1));
+            Assert.False(service.GetUserPermission(userId, operationId2));
         }
 
 
         [Fact]
         public void Test_User_Extra_Permission_2()
         {
+            var userId = Id();
+            var operationId1 = Id();
+            var operationId2 = Id();
+            var groupId = Id();
+            var groupTypeId = Id();
 
-            _service.EnsureGroup(1);
-            _service.EnsureOperation(1);
-            _service.EnsureUser(1);
+            var service = new TestUserService1();
+
+            service.EnsureGroup(groupId);
+            service.EnsureOperation(operationId1);
+            service.EnsureUser(userId);
 
             //group 1 has no permission on operation 1 
-            _service.SetGroupPermission(1, 1, false);
-
-            _service.EnsureUser(1, 1);
+            service.SetGroupPermission(groupId, operationId1, false);
+            
+            //user is from group1
+            service.EnsureUser(userId, groupId);
 
 
             //user is in group 1 so have not access to operation 1
             //but we grant her operation 1 exclusively
-            _service.SetUserExclusivePermission(1, 1, true);
+            service.SetUserExclusivePermission(userId, operationId1, true);
             //so
-            Assert.False(_service.GetGroupPermission(1, 1));
-            Assert.True(_service.GetUserPermission(1, 1));
+            Assert.False(service.GetGroupPermission(groupId, operationId1));
+            Assert.True(service.GetUserPermission(userId, operationId1));
         }
 
         [Fact]
         public void Test_UnKnown_User_And_Group()
         {
-            Assert.False(_service.UserExists(Id()));
-            Assert.False(_service.OperationExists(Id()));
-            Assert.False(_service.GroupExists(Id()));
-            Assert.False(_service.GroupTypeExists(Id()));
+            var service = new TestUserService1();
+            for (int i = 0; i < 100; i++)
+            {
+                Assert.False(service.UserExists(Id()));
+                Assert.False(service.OperationExists(Id()));
+                Assert.False(service.GroupExists(Id()));
+                Assert.False(service.GroupTypeExists(Id()));
+            }
+
             try
             {
-                _service.GetUserPermission(Id(), Id());
+                service.GetUserPermission(Id(), Id());
                 //this should not be hit
                 Assert.True(false);
             }
@@ -236,7 +292,7 @@ namespace Aditum.Tests.Case1
             }
             try
             {
-                _service.UnSetUserExtraPermission(Id(), Id());
+                service.UnSetUserExtraPermission(Id(), Id());
                 //this should not be hit
                 Assert.True(false);
             }
@@ -246,7 +302,7 @@ namespace Aditum.Tests.Case1
             }
             try
             {
-                _service.UnSetGroupPermission(Id(), Id());
+                service.UnSetGroupPermission(Id(), Id());
                 //this should not be hit
                 Assert.True(false);
             }
@@ -256,7 +312,7 @@ namespace Aditum.Tests.Case1
             }
             try
             {
-                _service.SetUserExclusivePermission(Id(), Id(), true);
+                service.SetUserExclusivePermission(Id(), Id(), true);
                 //this should not be hit
                 Assert.True(false);
             }

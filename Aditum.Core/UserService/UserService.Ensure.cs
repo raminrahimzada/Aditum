@@ -131,7 +131,7 @@ namespace Aditum.Core
             ReadLock(true);
 
             bool Predicate((TUserId UserId, TGroupId GroupId) x) =>
-                x.GroupId.Equals(groupId) && x.GroupId.Equals(groupId);
+                x.UserId.Equals(userId) && x.GroupId.Equals(groupId);
 
             var noNeedChanges = _userIds.Contains(userId) && _groupIds.Contains(groupId) &&
                                 _userGroups.Any(Predicate);
@@ -158,7 +158,7 @@ namespace Aditum.Core
             ReadLock(true);
 
             bool Predicate1((TUserId UserId, TGroupId GroupId) x) =>
-                x.GroupId.Equals(groupId) && x.GroupId.Equals(groupId);
+                x.UserId.Equals(userId) && x.GroupId.Equals(groupId);
 
             bool Predicate2((TGroupId GroupId, TGroupTypeId GroupTypeId) x) =>
                 x.GroupId.Equals(groupId) && x.GroupTypeId.Equals(groupTypeId);
